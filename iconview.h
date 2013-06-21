@@ -10,19 +10,15 @@ class KDirSortFilterProxyModel;
 class KFileItemDelegate;
 class KNewFileMenu;
 
-class RootPixmapServer;
 class IconView : public QListView
 {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "org.kde.kndesktop.IconView")
     public:
         explicit IconView( QWidget* parent = 0 );
         virtual ~IconView();
     public Q_SLOTS:
         bool setWallpaper( const QString& wallpaper );
         QString wallpaper() const;
-    Q_SIGNALS:
-        void wallpaperChanged() const;
     private Q_SLOTS:
         void init();
         void changeWallpaper();
@@ -44,7 +40,6 @@ class IconView : public QListView
     private:
         QString m_wallpaper;
         QPixmap* m_pixmap;
-        RootPixmapServer* m_rootPixmapServer;
         KDirModel* m_model;
         KFileItemDelegate* m_delegate;
         QItemSelectionModel* m_selectionModel;

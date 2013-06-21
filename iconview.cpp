@@ -1,5 +1,4 @@
 #include "iconview.h"
-#include "iconviewadaptor.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -32,8 +31,6 @@
 #define DEFAULT_WALLPAPER "/opt/kde4/share/wallpapers/stripes.png"
 #include <KFileDialog>
 
-#include "rootpixmapserver.h"
-
 IconView::IconView( QWidget* parent ) : QListView(parent),m_pixmap(0),m_actionCollection(this)
 {
     setViewMode( QListView::IconMode );
@@ -50,11 +47,6 @@ IconView::IconView( QWidget* parent ) : QListView(parent),m_pixmap(0),m_actionCo
 //     setStyleSheet( "background-color: transparent" );
     setObjectName( "iconview" );
 
-    new IconViewAdaptor( this );
-    QDBusConnection dbus = QDBusConnection::sessionBus();
-    dbus.registerObject( "/IconView", this );
-    dbus.registerService( "org.kde.kndesktop" );
-
     /// lazy initialization
     QTimer::singleShot( 0, this, SLOT(init()) );
 }
@@ -62,7 +54,6 @@ IconView::IconView( QWidget* parent ) : QListView(parent),m_pixmap(0),m_actionCo
 IconView::~IconView()
 {
     delete m_pixmap;
-    delete m_rootPixmapServer;
 }
 
 void IconView::init()
@@ -76,11 +67,6 @@ void IconView::init()
     QPalette p;
     p.setBrush( QPalette::Base, QBrush( *m_pixmap ) );
     setPalette( p );
-
-    emit wallpaperChanged();
-
-    m_rootPixmapServer = new RootPixmapServer;
-    m_rootPixmapServer->setPixmap( m_pixmap );
 
     m_model = new KDirModel( this );
     KDirLister* lister = new KDirLister( this );
@@ -173,8 +159,6 @@ bool IconView::setWallpaper( const QString& wallpaper )
     delete m_pixmap;
     m_pixmap = new QPixmap( m_wallpaper );
 
-    m_rootPixmapServer->setPixmap( m_pixmap );
-
     QPalette p;
     p.setBrush( QPalette::Base, QBrush( *m_pixmap ) );
     setPalette( p );
@@ -183,8 +167,6 @@ bool IconView::setWallpaper( const QString& wallpaper )
     KConfigGroup generalGroup( &config, "General" );
     generalGroup.writeEntry( "Wallpaper", m_wallpaper );
     generalGroup.config()->sync();
-
-    emit wallpaperChanged();
 
     return true;
 }
